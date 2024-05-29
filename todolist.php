@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     exit();
 }
 ?>
-
+<!-- html start from here  -->
 <!DOCTYPE html>
 <html lang="en">
 
