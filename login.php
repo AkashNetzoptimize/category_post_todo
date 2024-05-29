@@ -2,9 +2,9 @@
 include_once 'database.php';
 
 
-if (isset($_GET['login'])) {
-    $email = $_GET['email'];
-    $password = $_GET['password'];
+if (isset($_POST['login'])) {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
 
     $sql = "SELECT * FROM employess WHERE email ='$email' && password = '$password'";
     $query = mysqli_query($conn, $sql);
@@ -46,7 +46,7 @@ if (isset($_GET['login'])) {
 
     <h1 style="text-align: center;">Login Form</h1>
 
-    <form action="#" method="GET">
+    <form action="#" method="POST">
       <div class="mb-3">
         <label for="email">Email:</label class="form-label">
         <input type="email" name="email" id="email" class="form-control" required>

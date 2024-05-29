@@ -2,56 +2,81 @@
 include_once 'database.php';
 include_once 'session.php';
 
-// Retrieve the user's ID based on their email...............................................
+
+//user's ID based on their email..............................................................
 $email = $_SESSION['email'];
 $sql_user = "SELECT id FROM employess WHERE email = '$email'";
 $query_user = mysqli_query($conn, $sql_user);
+if (!$query_user) {
+    die("Error: " . mysqli_error($conn));
+}
+
 $user = mysqli_fetch_assoc($query_user);
 $user_id = $user['id'];
+
 
 
 //  tasks assigned to the logged-in user......................................................
 $sql_select = "SELECT * FROM todos WHERE assigned_to = $user_id";
 $query_select = mysqli_query($conn, $sql_select);
+if (!$query_select) {
+    die("Error: " . mysqli_error($conn));
+}
 
 
-// Retrieve list of employees.................................................................
+
+
+
+//  list of employees.........................................................................
 $sql_query = "SELECT id, name FROM employess";
 $user_query = mysqli_query($conn, $sql_query);
+if (!$user_query) {
+    die("Error: " . mysqli_error($conn));
+}
 $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
 
-// CHECK IF THE FORM IS SUBMITTED  ...........................................................
+
+
+
+
+//if the form is submitted....................................................................
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if(isset($_POST['update_status'])) {
-        if(isset($_POST['task_status'])) {
+    if (isset($_POST['update_status'])) {
+        if (isset($_POST['task_status'])) {
             $task_statuses = $_POST['task_status'];
-            foreach($task_statuses as $task_id => $status) {
-                $sql_update = "UPDATE todos SET status = '$status' WHERE id = $task_id";
-                mysqli_query($conn, $sql_update);
+            foreach ($task_statuses as $task_id => $status) {
+
+                $sql_update = "UPDATE todos SET status = ? WHERE id = ?";
+                $stmt = mysqli_prepare($conn, $sql_update);
+                mysqli_stmt_bind_param($stmt, "si", $status, $task_id);
+                mysqli_stmt_execute($stmt);
             }
         }
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
     }
-    
-    header("Location: ".$_SERVER['PHP_SELF']);
-    exit();
 }
 ?>
-<!-- html start from here  -->
+
+
+
+
+<!-- HTML starts here -->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin To-Do List</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <title>Admin To-Do List</title>
 </head>
 
 <body>
     <div class="container">
         <h2>Tasks:</h2>
-        <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+        <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
             <table class="table">
                 <thead>
                     <tr>
@@ -62,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while ($row = mysqli_fetch_assoc($query_select)): ?>
+                    <?php while ($row = mysqli_fetch_assoc($query_select)) : ?>
                         <tr>
                             <td><?php echo $row['id']; ?></td>
                             <td><?php echo $row['task']; ?></td>
@@ -95,3 +120,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </body>
 
 </html>
+
+
+
+

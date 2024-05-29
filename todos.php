@@ -2,9 +2,25 @@
 include_once 'database.php';
 include_once 'session.php';
 
+//  changing task status
+if (isset($_POST['change_status'])) {
+    $task_id = $_POST['task_id'];
+    $new_status = $_POST['new_status'];
+
+    $sql_update_status = "UPDATE todos SET status='$new_status' WHERE id=$task_id";
+    $query_update_status = mysqli_query($conn, $sql_update_status);
+
+    if ($query_update_status) {
+        echo "Status updated successfully";
+    } else {
+        echo "Failed to update status";
+    }
+}
+
+// Handle adding new task
 if (isset($_POST['add_task'])) {
     $task = $_POST['task'];
-    $assigned_to = $_POST['assigned_to']; 
+    $assigned_to = $_POST['assigned_to'];
 
     $sql_insert = "INSERT INTO todos (task, assigned_to, status) VALUES ('$task', '$assigned_to', 'pending')";
     $query_insert = mysqli_query($conn, $sql_insert);
@@ -16,11 +32,11 @@ if (isset($_POST['add_task'])) {
     }
 }
 
-// Retrieve all tasks.........................................................................
+// Retrieve all tasks
 $sql_all_tasks = "SELECT id, task, assigned_to, status FROM todos";
 $query_all_tasks = mysqli_query($conn, $sql_all_tasks);
 
-// Retrieve list of employees.................................................................
+// Retrieve list of employees
 $sql_query = "SELECT id, name FROM employess";
 $user_query = mysqli_query($conn, $sql_query);
 $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
@@ -39,7 +55,7 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
 <body>
     <div class="container">
         <h1 style="text-align: center;">Admin To-Do List</h1>
-        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST">
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
             <div class="mb-3">
                 <label for="task">Task:</label>
                 <input type="text" name="task" id="task" class="form-control" required>
@@ -48,13 +64,22 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
                 <label for="assigned_to">Assign To:</label>
                 <select name="assigned_to" id="assigned_to" class="form-control" required>
                     <option value="">Select User</option>
-                    <?php foreach ($employees as $employee): ?>
+                    <?php foreach ($employees as $employee) : ?>
                         <option value="<?php echo $employee['id']; ?>"><?php echo $employee['name']; ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
+            <!-- this button for add task  -->
             <input type="submit" value="Add Task" name="add_task" class="form-control btn btn-primary">
         </form>
+
+
+
+
+
+
+        
+        <!-- task table show to admin  -->
         <h2>Tasks:</h2>
         <table class="table">
             <thead>
@@ -63,16 +88,17 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
                     <th scope="col">Task Description</th>
                     <th scope="col">Assigned To</th>
                     <th scope="col">Status</th>
+                    <th scope="col">Change Status</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Display taskssssss based on status pending , In progress , completed  -->
-                <?php while ($row = mysqli_fetch_assoc($query_all_tasks)): ?>
+                <!-- Display tasks based on status pending, In progress, completed -->
+                <?php while ($row = mysqli_fetch_assoc($query_all_tasks)) : ?>
                     <tr>
                         <td><?php echo $row['id']; ?></td>
                         <td><?php echo $row['task']; ?></td>
                         <td>
-                            <?php 
+                            <?php
                             $assigned_user = "Not assigned to a user";
                             foreach ($employees as $employee) {
                                 if ($employee['id'] == $row['assigned_to']) {
@@ -84,10 +110,26 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
                             ?>
                         </td>
                         <td><?php echo $row['status']; ?></td>
+
+                        <!-- this is for staus update by admin using select option  -->
+                        <td>
+                            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
+                                <input type="hidden" name="task_id" value="<?php echo $row['id']; ?>">
+                                <select name="new_status" class="form-control" required>
+                                    <option value="pending" <?php if ($row['status'] == 'pending') echo 'selected'; ?>>Pending</option>
+                                    <option value="in_progress" <?php if ($row['status'] == 'in_progress') echo 'selected'; ?>>In Progress</option>
+                                    <option value="completed" <?php if ($row['status'] == 'completed') echo 'selected'; ?>>Completed</option>
+                                </select>
+
+                                <!-- button to submit to change the status  -->
+                                <input type="submit" value="Change Status" name="change_status" class="form-control btn btn-primary mt-1">
+                            </form>
+                        </td>
                     </tr>
                 <?php endwhile; ?>
             </tbody>
         </table>
     </div>
 </body>
+
 </html>
