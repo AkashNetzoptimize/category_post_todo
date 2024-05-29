@@ -10,7 +10,6 @@ $query_user = mysqli_query($conn, $sql_user);
 if (!$query_user) {
     die("Error: " . mysqli_error($conn));
 }
-
 $user = mysqli_fetch_assoc($query_user);
 $user_id = $user['id'];
 
@@ -41,11 +40,13 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
 
 //if the form is submitted....................................................................
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    // here updated status check  ............................................................
     if (isset($_POST['update_status'])) {
         if (isset($_POST['task_status'])) {
             $task_statuses = $_POST['task_status'];
-            foreach ($task_statuses as $task_id => $status) {
 
+            foreach ($task_statuses as $task_id => $status) {
                 $sql_update = "UPDATE todos SET status = ? WHERE id = ?";
                 $stmt = mysqli_prepare($conn, $sql_update);
                 mysqli_stmt_bind_param($stmt, "si", $status, $task_id);
@@ -120,7 +121,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </body>
 
 </html>
-
-
-
 
