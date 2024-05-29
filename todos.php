@@ -16,11 +16,11 @@ if (isset($_POST['add_task'])) {
     }
 }
 
-// Retrieve all tasks
+// Retrieve all tasks.........................................................................
 $sql_all_tasks = "SELECT id, task, assigned_to, status FROM todos";
 $query_all_tasks = mysqli_query($conn, $sql_all_tasks);
 
-// Retrieve list of employees
+// Retrieve list of employees.................................................................
 $sql_query = "SELECT id, name FROM employess";
 $user_query = mysqli_query($conn, $sql_query);
 $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
@@ -66,7 +66,7 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
                 </tr>
             </thead>
             <tbody>
-                <!-- Display taskssssss based on status -->
+                <!-- Display taskssssss based on status pending , In progress , completed  -->
                 <?php while ($row = mysqli_fetch_assoc($query_all_tasks)): ?>
                     <tr>
                         <td><?php echo $row['id']; ?></td>
