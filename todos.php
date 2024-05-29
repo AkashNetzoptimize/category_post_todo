@@ -76,9 +76,6 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
 
 
 
-
-
-        
         <!-- task table show to admin  -->
         <h2>Tasks:</h2>
         <table class="table">
@@ -117,7 +114,7 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
                                 <input type="hidden" name="task_id" value="<?php echo $row['id']; ?>">
                                 <select name="new_status" class="form-control" required>
                                     <option value="pending" <?php if ($row['status'] == 'pending') echo 'selected'; ?>>Pending</option>
-                                    <option value="in_progress" <?php if ($row['status'] == 'in_progress') echo 'selected'; ?>>In Progress</option>
+                                    <option value="inprogress" <?php if ($row['status'] == 'inprogress') echo 'selected'; ?>>In Progress</option>
                                     <option value="completed" <?php if ($row['status'] == 'completed') echo 'selected'; ?>>Completed</option>
                                 </select>
 
@@ -130,6 +127,8 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
             </tbody>
         </table>
     </div>
+
+
 </body>
 
 </html>
