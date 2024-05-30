@@ -2,7 +2,7 @@
 include_once 'database.php';
 include_once 'session.php';
 
-//  changing task status
+// Handle changing task status................................................................
 if (isset($_POST['change_status'])) {
     $task_id = $_POST['task_id'];
     $new_status = $_POST['new_status'];
@@ -17,7 +17,9 @@ if (isset($_POST['change_status'])) {
     }
 }
 
-// Handle adding new task
+
+
+// Handle adding new task.....................................................................
 if (isset($_POST['add_task'])) {
     $task = $_POST['task'];
     $assigned_to = $_POST['assigned_to'];
@@ -32,15 +34,21 @@ if (isset($_POST['add_task'])) {
     }
 }
 
-// Retrieve all tasks
+
+
+
+// Retrieve all tasks........................................................................
 $sql_all_tasks = "SELECT id, task, assigned_to, status FROM todos";
 $query_all_tasks = mysqli_query($conn, $sql_all_tasks);
 
-// Retrieve list of employees
+
+
+// Retrieve list of employees.................................................................
 $sql_query = "SELECT id, name FROM employess";
 $user_query = mysqli_query($conn, $sql_query);
 $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -48,6 +56,7 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <title>Admin To-Do List</title>
 </head>
@@ -72,9 +81,6 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
             <!-- this button for add task  -->
             <input type="submit" value="Add Task" name="add_task" class="form-control btn btn-primary">
         </form>
-
-
-
 
         <!-- task table show to admin  -->
         <h2>Tasks:</h2>
@@ -108,18 +114,17 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
                         </td>
                         <td><?php echo $row['status']; ?></td>
 
-                        <!-- this is for staus update by admin using select option  -->
+                        <!-- this is for status update by admin using select option  -->
                         <td>
-                            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
+                            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST" class="status-form">
                                 <input type="hidden" name="task_id" value="<?php echo $row['id']; ?>">
-                                <select name="new_status" class="form-control" required>
+                                <select name="new_status" class="form-control status-select" required>
                                     <option value="pending" <?php if ($row['status'] == 'pending') echo 'selected'; ?>>Pending</option>
                                     <option value="inprogress" <?php if ($row['status'] == 'inprogress') echo 'selected'; ?>>In Progress</option>
                                     <option value="completed" <?php if ($row['status'] == 'completed') echo 'selected'; ?>>Completed</option>
                                 </select>
-
-                                <!-- button to submit to change the status  -->
-                                <input type="submit" value="Change Status" name="change_status" class="form-control btn btn-primary mt-1">
+                                <input type="hidden" name="change_status" value="1"> <!-- This hidden input field indicates that this form is for changing status -->
+                                <input type="submit" style="display: none;"> <!-- Hide the submit button -->
                             </form>
                         </td>
                     </tr>
@@ -128,7 +133,13 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
         </table>
     </div>
 
-
+    <script>
+        $(document).ready(function() {
+            $('.status-select').change(function() {
+                $(this).closest('.status-form').submit();
+            });
+        });
+    </script>
 </body>
 
 </html>
