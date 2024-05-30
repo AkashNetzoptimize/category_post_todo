@@ -123,8 +123,8 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
                                     <option value="inprogress" <?php if ($row['status'] == 'inprogress') echo 'selected'; ?>>In Progress</option>
                                     <option value="completed" <?php if ($row['status'] == 'completed') echo 'selected'; ?>>Completed</option>
                                 </select>
-                                <input type="hidden" name="change_status" value="1"> <!-- This hidden input field indicates that this form is for changing status -->
-                                <input type="submit" style="display: none;"> <!-- Hide the submit button -->
+                                <input type="hidden" name="change_status" value="1"> 
+                                <input type="submit" style="display: none;"> 
                             </form>
                         </td>
                     </tr>
