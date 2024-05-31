@@ -13,23 +13,14 @@ $user = mysqli_fetch_assoc($query_user);
 $user_id = $user['id'];
 $user_name = $user['name'];
 
-
-
-
-
-
-
-// tasks assigned to the logged-in user......................................................
+// tasks assigned to the logged-in user
 $sql_select = "SELECT * FROM todos WHERE assigned_to = $user_id";
 $query_select = mysqli_query($conn, $sql_select);
 if (!$query_select) {
     die("Error: " . mysqli_error($conn));
 }
 
-
-
-
-// list of employees.........................................................................
+// list of employees
 $sql_query = "SELECT id, name FROM employess";
 $user_query = mysqli_query($conn, $sql_query);
 if (!$user_query) {
@@ -37,12 +28,7 @@ if (!$user_query) {
 }
 $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
 
-
-
-
-
-
-// if the form is submitted..................................................................
+// if the form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // update status
     if (isset($_POST['update_status'])) {
@@ -61,14 +47,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-
-
-    // add comment..........................................................................
+    // add comment or reply
     if (isset($_POST['submit_comment'])) {
         $task_id = mysqli_real_escape_string($conn, $_POST['task_id']);
         $comment_text = mysqli_real_escape_string($conn, $_POST['comment_text']);
 
-        $sql_insert_comment = "INSERT INTO todos_comments (task_id, commenter_name, comment_text) VALUES ('$task_id', '$user_name', '$comment_text')";
+        // New field: parent_comment_id
+        $parent_comment_id = isset($_POST['parent_comment_id']) ? $_POST['parent_comment_id'] : null;
+
+        $sql_insert_comment = "INSERT INTO todos_comments (task_id, commenter_name, comment_text, parent_comment_id) VALUES ('$task_id', '$user_name', '$comment_text', '$parent_comment_id')";
         mysqli_query($conn, $sql_insert_comment);
 
         header("Location: " . $_SERVER['PHP_SELF']);
@@ -104,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <?php while ($row = mysqli_fetch_assoc($query_select)) : ?>
                     <tr>
                         <td><?php echo $row['id']; ?></td>
-                        <td><?php echo $row['task']; ?></td>
+                        <td><a href="task_discussion.php?task_id=<?php echo $row['id']; ?>"><?php echo $row['task']; ?></a></td>
                         <td>
                             <?php
                             $assigned_user = "Not assigned to a user";
@@ -125,24 +112,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             </select>
                         </td>
                     </tr>
-
-                    <!-- Comment Section -->
-                    <tr>
-                        <td colspan="4">
-                            <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-                                <input type="hidden" name="task_id" value="<?php echo $row['id']; ?>">
-                                <textarea name="comment_text" rows="2" cols="50" placeholder="Add a comment"></textarea>
-                                <button type="submit" name="submit_comment" class="btn btn-sm btn-primary">Add Comment</button>
-                            </form>
-
-                            <?php
-                            $task_comments = mysqli_query($conn, "SELECT comment_text, commenter_name FROM todos_comments WHERE task_id = " . $row['id']);
-                            while ($comment = mysqli_fetch_assoc($task_comments)) {
-                                echo "<div>" . $comment['comment_text'] . " (😎" . $comment['commenter_name'] . ")</div>";
-                            }
-                            ?>
-                        </td>
-                    </tr>
                 <?php endwhile; ?>
             </tbody>
         </table>
@@ -151,4 +120,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </body>
 
 </html>
-

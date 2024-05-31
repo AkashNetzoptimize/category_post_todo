@@ -2,7 +2,7 @@
 include_once 'database.php';
 include_once 'session.php';
 
-// Handle changing task status................................................................
+// Handle changing task status
 if (isset($_POST['change_status'])) {
     $task_id = $_POST['task_id'];
     $new_status = $_POST['new_status'];
@@ -17,9 +17,7 @@ if (isset($_POST['change_status'])) {
     }
 }
 
-
-
-// Handle adding new task.....................................................................
+// Handle adding new task
 if (isset($_POST['add_task'])) {
     $task = $_POST['task'];
     $assigned_to = $_POST['assigned_to'];
@@ -34,19 +32,41 @@ if (isset($_POST['add_task'])) {
     }
 }
 
-
-
-
-// Retrieve all tasks........................................................................
+// Retrieve all tasks
 $sql_all_tasks = "SELECT id, task, assigned_to, status FROM todos";
 $query_all_tasks = mysqli_query($conn, $sql_all_tasks);
 
-
-
-// Retrieve list of employees.................................................................
+// Retrieve list of employees
 $sql_query = "SELECT id, name FROM employess";
 $user_query = mysqli_query($conn, $sql_query);
 $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
+
+// Handle deleting comments
+if (isset($_POST['delete_comment'])) {
+    $comment_id = $_POST['delete_comment_id'];
+
+    $sql_delete_comment = "DELETE FROM todos_comments WHERE id=$comment_id";
+    $query_delete_comment = mysqli_query($conn, $sql_delete_comment);
+
+    if ($query_delete_comment) {
+        echo "Comment deleted successfully";
+    } else {
+        echo "Failed to delete comment";
+    }
+}
+
+// Handle adding replies
+if (isset($_POST['submit_reply'])) {
+    $task_id = mysqli_real_escape_string($conn, $_POST['task_id']);
+    $reply_to_comment_id = mysqli_real_escape_string($conn, $_POST['reply_to_comment_id']);
+    $reply_text = mysqli_real_escape_string($conn, $_POST['reply_text']);
+
+    $sql_insert_reply = "INSERT INTO todos_comments (task_id, commenter_name, comment_text, reply_to_comment_id) VALUES ('$task_id', '$user_name', '$reply_text', '$reply_to_comment_id')";
+    mysqli_query($conn, $sql_insert_reply);
+
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -78,11 +98,9 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
                     <?php endforeach; ?>
                 </select>
             </div>
-            <!-- this button for add task  -->
             <input type="submit" value="Add Task" name="add_task" class="form-control btn btn-primary">
         </form>
 
-        <!-- task table show to admin  -->
         <h2>Tasks:</h2>
         <table class="table">
             <thead>
@@ -92,10 +110,10 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
                     <th scope="col">Assigned To</th>
                     <th scope="col">Status</th>
                     <th scope="col">Change Status</th>
+                    <th scope="col">Comments</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Display tasks based on status pending, In progress, completed -->
                 <?php while ($row = mysqli_fetch_assoc($query_all_tasks)) : ?>
                     <tr>
                         <td><?php echo $row['id']; ?></td>
@@ -113,8 +131,6 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
                             ?>
                         </td>
                         <td><?php echo $row['status']; ?></td>
-
-                        <!-- this is for status update by admin using select option  -->
                         <td>
                             <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST" class="status-form">
                                 <input type="hidden" name="task_id" value="<?php echo $row['id']; ?>">
@@ -123,9 +139,12 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
                                     <option value="inprogress" <?php if ($row['status'] == 'inprogress') echo 'selected'; ?>>In Progress</option>
                                     <option value="completed" <?php if ($row['status'] == 'completed') echo 'selected'; ?>>Completed</option>
                                 </select>
-                                <input type="hidden" name="change_status" value="1"> 
-                                <input type="submit" style="display: none;"> 
+                                <input type="hidden" name="change_status" value="1">
+                                <input type="submit" style="display: none;">
                             </form>
+                        </td>
+                        <td>
+                            <a href="task_discussion.php?task_id=<?php echo $row['id']; ?>">View Comments</a>
                         </td>
                     </tr>
                 <?php endwhile; ?>
@@ -143,3 +162,7 @@ $employees = mysqli_fetch_all($user_query, MYSQLI_ASSOC);
 </body>
 
 </html>
+
+
+
+
