@@ -71,6 +71,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["profile_picture"])) {
 
 </body>
 </html>
-
-
-

@@ -3,11 +3,13 @@ include_once('database.php');
 include_once 'session.php';
 
 if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == true) {
-    $sql_select_profile = "SELECT image FROM uploads WHERE id = (SELECT MAX(id) FROM uploads)";
+    // Check if the user has uploaded a profile picture
+    $email = $_SESSION['email'];
+    $sql_select_profile = "SELECT profile_picture FROM employess WHERE email = '$email'";
     $query_select_profile = mysqli_query($conn, $sql_select_profile);
 
     if($query_select_profile && mysqli_num_rows($query_select_profile) > 0) {
-        $profile_picture = mysqli_fetch_assoc($query_select_profile)['image'];
+        $profile_picture = mysqli_fetch_assoc($query_select_profile)['profile_picture'];
 ?>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -29,6 +31,7 @@ if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == true) {
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search_query">
                 <button class="btn btn-outline-light" type="submit">Search</button>
             </form>
+            <!-- Display profile picture -->
             <img src="image/<?php echo $profile_picture; ?>" alt="Profile Picture" class="rounded-circle" style="width: 40px; height: 40px;">
             <?php
                 echo '<ul class="navbar-nav">

@@ -33,16 +33,17 @@
         
             <?php if(isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == true): ?>
                 <?php
-               
-                $sql_select_profile = "SELECT image FROM uploads WHERE id = (SELECT MAX(id) FROM uploads)";
+                $email = $_SESSION['email'];
+                $sql_select_profile = "SELECT profile_picture FROM employess WHERE email = '$email'";
                 $query_select_profile = mysqli_query($conn, $sql_select_profile);
-                $profile_picture = mysqli_fetch_assoc($query_select_profile)['image'];
+                $profile_picture = mysqli_fetch_assoc($query_select_profile)['profile_picture'];
                 ?>
-                <?php if($profile_picture): ?>
-                    <img src="image/<?php echo $profile_picture; ?>" alt="Profile Picture" class="rounded-circle" style="width: 40px; height: 40px;">
-                <?php endif; ?>
-                
                 <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <?php if($profile_picture): ?>
+                            <img src="image/<?php echo $profile_picture; ?>" alt="Profile Picture" class="rounded-circle" style="width: 40px; height: 40px;">
+                        <?php endif; ?>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="logout.php">Logout</a>
                     </li>
@@ -60,4 +61,5 @@
         </div>
     </div>
 </nav>
+
 
