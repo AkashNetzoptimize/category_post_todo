@@ -13,6 +13,5 @@ if ($userRole === 'admin') {
 
 
 
-
 // echo "userSelect: " . $_SESSION['userSelect'];
 // echo "userRole: " . $userRole;

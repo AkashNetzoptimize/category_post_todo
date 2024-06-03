@@ -2,8 +2,27 @@
 include_once('database.php'); 
 include_once 'session.php';
 
+// Image Upload
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["profile_picture"])) {
+    $fileName = $_FILES["profile_picture"]["name"];
+    $tmpName = $_FILES["profile_picture"]["tmp_name"];
+    $folder = 'image/' . $fileName;
 
+    if (move_uploaded_file($tmpName, $folder)) {
+        $email = $_SESSION['email'];
+        $sql_update_profile_picture = "UPDATE employess SET profile_picture = '$fileName' WHERE email = '$email'";
+
+        if (mysqli_query($conn, $sql_update_profile_picture)) {
+            echo "<h2>Profile picture uploaded successfully</h2>";
+        } else {
+            echo "<h2>Failed to update profile picture</h2>";
+        }
+    } else {
+        echo "<h2>Error uploading profile picture</h2>";
+    }
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -32,13 +51,26 @@ include_once 'session.php';
 </head>
 <body>
 
-    <div class="container">
-        <div class="content">
+<div class="container">
+    <div class="content">
         
-            <h3>Hi,</h3>
-            <h1>Welcome <span></span></h1>
-            <p>This is a user page</p>
-        </div>
+        <!-- Image Upload Form -->
+        <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="profile_picture" class="form-label">Profile Picture</label>
+                <input type="file" class="form-control" id="profile_picture" name="profile_picture" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Upload Profile Picture</button>
+        </form>
+
+        <h3>Hi,</h3>
+        <h1>Welcome <span></span></h1>
+        <p>This is a user page</p>
     </div>
+</div>
+
 </body>
 </html>
+
+
+
