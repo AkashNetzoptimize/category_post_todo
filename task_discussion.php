@@ -7,33 +7,56 @@ $task_id = $_GET['task_id'];
 
 $sql_task = "SELECT * FROM todos WHERE id = $task_id";
 $result_task = mysqli_query($conn, $sql_task);
+if (!$result_task) {
+    die("Error fetching task: " . mysqli_error($conn));
+}
 $task = mysqli_fetch_assoc($result_task);
 
+
+
+
+
 $assigned_user_id = $task['assigned_to'];
-$sql_assigned_user = "SELECT name FROM employess WHERE id = $assigned_user_id";
+$sql_assigned_user = "SELECT name, profile_picture FROM employess WHERE id = $assigned_user_id";
 $result_assigned_user = mysqli_query($conn, $sql_assigned_user);
+if (!$result_assigned_user) {
+    die("Error fetching assigned user: " . mysqli_error($conn));
+}
 $assigned_user = mysqli_fetch_assoc($result_assigned_user);
 $assigned_to_name = $assigned_user['name'];
+$assigned_to_image = $assigned_user['profile_picture'];
 
-$sql_comments = "SELECT * FROM todos_comments WHERE task_id = $task_id";
+$sql_comments = "SELECT c.*, e.profile_picture FROM todos_comments c
+                 INNER JOIN employess e ON c.commenter_name = e.name
+                 WHERE c.task_id = $task_id";
 $result_comments = mysqli_query($conn, $sql_comments);
+if (!$result_comments) {
+    die("Error fetching comments: " . mysqli_error($conn));
+}
+
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_comment'])) {
-    $commenter_email = $_SESSION['email']; 
-  
+    $commenter_email = $_SESSION['email'];
 
     $sql_get_commenter_name = "SELECT name FROM employess WHERE email = '$commenter_email'";
     $result_get_commenter_name = mysqli_query($conn, $sql_get_commenter_name);
+    if (!$result_get_commenter_name) {
+        die("Error fetching commenter name: " . mysqli_error($conn));
+    }
     $row_commenter_name = mysqli_fetch_assoc($result_get_commenter_name);
     $commenter_name = $row_commenter_name['name'];
 
-    $comment_text = mysqli_real_escape_string($conn, $_POST['comment_text']); 
+    $comment_text = mysqli_real_escape_string($conn, $_POST['comment_text']);
     $sql_insert_comment = "INSERT INTO todos_comments (task_id, commenter_name, comment_text) VALUES ($task_id, '$commenter_name', '$comment_text')";
-    mysqli_query($conn, $sql_insert_comment);
+    if (!mysqli_query($conn, $sql_insert_comment)) {
+        die("Error inserting comment: " . mysqli_error($conn));
+    }
 
     header("Location: {$_SERVER['PHP_SELF']}?task_id=$task_id");
     exit();
 }
+
 
 ?>
 
@@ -78,10 +101,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_comment'])) {
             border-radius: 8px;
             padding: 10px;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
         }
 
         .comment p {
             margin: 0;
+        }
+
+        .comment img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 1px solid black;
         }
 
         .commenter-name {
@@ -104,6 +137,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_comment'])) {
         <h2>Task: <?php echo htmlspecialchars($task['task']); ?></h2>
         <div class="assigned-info">
             <p><b>Assigned To:</b> <?php echo htmlspecialchars($assigned_to_name); ?></p>
+            <?php if ($assigned_to_image) : ?>
+                <img src="/image/<?php echo htmlspecialchars($assigned_to_image); ?>" alt="Assigned User Image">
+            <?php endif; ?>
             <p><b>Status:</b> <?php echo htmlspecialchars($task['status']); ?></p>
         </div>
 
@@ -112,8 +148,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_comment'])) {
 
             <?php while ($comment = mysqli_fetch_assoc($result_comments)) : ?>
                 <div class="comment">
+                    <?php if ($comment['profile_picture']) : ?>
+                        <img src="/image/<?php echo htmlspecialchars($comment['profile_picture']); ?>" alt="Commenter image">
+                    <?php endif; ?>
                     <p><span class="commenter-name"><?php echo htmlspecialchars($comment['commenter_name']); ?>:</span> <?php echo htmlspecialchars($comment['comment_text']); ?></p>
                 </div>
+                
             <?php endwhile; ?>
         </div>
 
